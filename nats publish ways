@@ -1,0 +1,38 @@
+natsConnection.publish("subjectName", "Hello NATS".getBytes(StandardCharsets.UTF_8));
+
+-----------------
+
+2. Publish with Reply (Request-Reply Pattern)
+
+
+Message reply = natsConnection.request("subjectName", "Request Data".getBytes(StandardCharsets.UTF_8), 1000);
+String response = new String(reply.getData(), StandardCharsets.UTF_8);
+System.out.println("Received response: " + response);
+
+--------------------
+
+Publish with Headers (NATS 2.2+)
+
+Headers headers = new Headers();
+headers.add("key1", "value1").add("key2", "value2");
+
+natsConnection.publish("subjectWithHeaders", headers, "Message with headers".getBytes(StandardCharsets.UTF_8));
+
+
+--------------------------
+
+Publish to a Queue Group
+
+
+
+natsConnection.publish("queueGroupSubject", "Task for queue group".getBytes(StandardCharsets.UTF_8));
+
+
+-----------------------
+
+Stream Publish (JetStream)
+
+
+JetStream js = natsConnection.jetStream();
+js.publish("streamSubject", "Persistent message".getBytes(StandardCharsets.UTF_8));
+

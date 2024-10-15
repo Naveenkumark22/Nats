@@ -1,0 +1,78 @@
+1. Basic Subscription
+
+Dispatcher dispatcher = natsConnection.createDispatcher((msg) -> {
+    String message = new String(msg.getData(), StandardCharsets.UTF_8);
+    System.out.println("Received: " + message);
+});
+
+dispatcher.subscribe("subjectName");
+
+----------------
+
+2. Queue Group Subscription (Load Balancing)
+
+Dispatcher dispatcher = natsConnection.createDispatcher((msg) -> {
+    String message = new String(msg.getData(), StandardCharsets.UTF_8);
+    System.out.println("Queue Group Received: " + message);
+});
+
+dispatcher.subscribe("subjectName", "queueGroup");
+
+---------------
+
+3. Request-Reply Subscription
+
+Dispatcher dispatcher = natsConnection.createDispatcher((msg) -> {
+    String requestMessage = new String(msg.getData(), StandardCharsets.UTF_8);
+    System.out.println("Received request: " + requestMessage);
+
+    // Send a reply
+    natsConnection.publish(msg.getReplyTo(), "Reply message".getBytes(StandardCharsets.UTF_8));
+});
+
+dispatcher.subscribe("requestSubject");
+
+-------------------
+4. Asynchronous Subscription
+
+
+
+Dispatcher dispatcher = natsConnection.createDispatcher((msg) -> {
+    String message = new String(msg.getData(), StandardCharsets.UTF_8);
+    System.out.println("Received asynchronously: " + message);
+});
+
+dispatcher.subscribe("asyncSubject");
+
+--------------------------
+5. JetStream Consumer (Stream Processing)
+
+JetStream js = natsConnection.jetStream();
+PushSubscribeOptions options = PushSubscribeOptions.builder().durable("durableConsumer").build();
+
+js.subscribe("streamSubject", options, (msg) -> {
+    String message = new String(msg.getData(), StandardCharsets.UTF_8);
+    System.out.println("JetStream Received: " + message);
+    msg.ack(); // Acknowledge the message
+});
+---------------------------
+
+6. Pull-Based JetStream Subscription
+
+JetStream js = natsConnection.jetStream();
+PullSubscribeOptions pullOptions = PullSubscribeOptions.builder().durable("pullConsumer").build();
+
+JetStreamSubscription sub = js.subscribe("streamSubject", pullOptions);
+
+// Pull messages in a batch
+List<Message> messages = sub.fetch(10);
+for (Message msg : messages) {
+    System.out.println("Pulled message: " + new String(msg.getData(), StandardCharsets.UTF_8));
+    msg.ack();
+}
+
+--------------------------------
+
+
+
+      
